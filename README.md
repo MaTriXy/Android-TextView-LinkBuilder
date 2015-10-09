@@ -16,6 +16,8 @@ Similar to how all the big players do it (Google+, Twitter, *cough* Talon *cough
  - Change the color of the linked text
  - Modify the transparency of the text's highlighting when the user touches it
  - Set whether or not you want the text underlined
+ - Set whether or not you want the text bold
+ - Default link color from an activity theme
 
 The main advantage to using this library over TextView's autolink functionality is that you can link anything, not just web address, emails, and phone numbers. It also provides color customization and touch feedback.
 
@@ -28,15 +30,8 @@ There are two ways to use this library:
 This is the preferred way. Simply add:
 
 ```groovy
-// make sure you have added the snapshot repository
-repositories {
-    maven {
-        url 'https://oss.sonatype.org/content/repositories/snapshots/'
-    }
-}
-
 dependencies {
-    compile 'com.klinkerapps:link_builder:1.0.5-SNAPSHOT@aar'
+    compile 'com.klinkerapps:link_builder:1.3.0@aar'
 }
 ```
 
@@ -50,6 +45,8 @@ Download the source code and import it as a library project in Eclipse. The proj
 
 Functionality can be found in the example's [MainActivity](https://github.com/klinker24/Android-TextView-LinkBuilder/blob/master/example/src/main/java/com/klinker/android/link_builder_example/MainActivity.java)
 
+For a list of regular expressions that I use in Talon, you can go [here](https://github.com/klinker24/Talon-for-Twitter/blob/master/src/main/java/com/klinker/android/twitter/utils/text/Regex.java)
+
 ```java
 // Create the link rule to set what text should be linked.
 // can use a specific string or a regex pattern
@@ -57,6 +54,7 @@ Link link = new Link("click here")
     .setTextColor(Color.parseColor("#259B24"))    // optional, defaults to holo blue
     .setHighlightAlpha(.4f) 					  // optional, defaults to .15f
     .setUnderlined(false) 						  // optional, defaults to true
+    .setBold(true)      						  // optional, defaults to false
     .setOnLongClickListener(new Link.OnLongClickListener() {
         @Override
         public void onLongClick(String clickedText) {
@@ -70,11 +68,47 @@ Link link = new Link("click here")
         }
     });
 
+TextView demoText = (TextView) findViewById(R.id.test_text);
+
 // create the link builder object add the link rule
-new LinkBuilder(textView)
+LinkBuilder.on(demoText)
     .addLink(link)
     .build(); // create the clickable links
 ```
+
+With version 1.1.0, you can create a CharSequence from a String instead of creating and applying the links directly to the TextView. Do not forget to set the movement method on your TextView's after you have applied the CharSequence, or else the links will not be clickable.
+
+```java
+// find the text view. Used to create the link builder
+TextView demoText = (TextView) findViewById(R.id.test_text);
+
+// Add the links and make the links clickable
+CharSequence sequence = LinkBuilder.from(this, demoText.getText().toString())
+    .addLinks(getExampleLinks())
+    .build();
+
+demoText.setText(sequence);
+
+// if you forget to set the movement method, then your text will not be clickable!
+demoText.setMovementMethod(TouchableMovementMethod.getInstance());
+```
+
+If you would like to set the default text color for links without inputting it manually on each Link object, it can be set from the activity theme.
+
+```xml
+<style name="LinkBuilderExampleTheme" parent="android:Theme.Holo.Light">
+    <item name="linkBuilderStyle">@style/LinkBuilder</item>
+</style>
+<style name="LinkBuilder">
+    <item name="defaultLinkColor">#222222</item>
+</style>
+```
+
+## Usage with ListView.OnItemClickListener
+
+By default, LinkBuilder will consume all the touch events on your TextView. This means that ListView.OnItemClickListener will never get called if you try to implement it. The fix for this is to implement the LinkConsumableTextView rather than the normal TextView in your layouts.
+
+My LinkConsumableTextView will only consume touch events if you have clicked the link within the TextView. Otherwise, it will defer the touch event to the parent, which allows you to use ListView's OnItemClickListener method.
 
 ## Contributing
 

@@ -15,21 +15,24 @@
 package com.klinker.android.link_builder;
 
 import android.graphics.Color;
+import android.graphics.Typeface;
 
 import java.util.regex.Pattern;
 
 public class Link {
 
-    private static final int DEFAULT_COLOR = Color.parseColor("#33B5E5");
+    public static final int DEFAULT_COLOR = Color.parseColor("#33B5E5");
     private static final float DEFAULT_ALPHA = .20f;
 
     private String text;
     private String prependedText;
     private String appendedText;
     private Pattern pattern;
-    private int textColor = DEFAULT_COLOR;
+    private int textColor = 0;
     private float highlightAlpha = DEFAULT_ALPHA;
     private boolean underlined = true;
+    private boolean bold = false;
+    private Typeface typeface;
 
     private OnClickListener clickListener;
     private OnLongClickListener longClickListener;
@@ -48,6 +51,8 @@ public class Link {
         this.textColor = link.getTextColor();
         this.highlightAlpha = link.getHighlightAlpha();
         this.underlined = link.isUnderlined();
+        this.bold = link.isBold();
+        this.typeface = link.getTypeface();
     }
 
     /**
@@ -151,12 +156,27 @@ public class Link {
     }
 
     /**
+     * Specify whether you want it bold or not.
+     * @param bold
+     * @return the current link object.
+     */
+    public Link setBold(boolean bold) {
+        this.bold = bold;
+        return this;
+    }
+
+    /**
      * Specify the alpha of the links background when the user clicks it.
      * @param alpha
      * @return the current link object.
      */
     public Link setHighlightAlpha(float alpha) {
         this.highlightAlpha = alpha;
+        return this;
+    }
+
+    public Link setTypeface(Typeface typeface) {
+        this.typeface = typeface;
         return this;
     }
 
@@ -186,6 +206,14 @@ public class Link {
 
     public boolean isUnderlined() {
         return underlined;
+    }
+
+    public boolean isBold() {
+        return bold;
+    }
+
+    public Typeface getTypeface() {
+        return typeface;
     }
 
     public OnClickListener getClickListener() {

@@ -14,10 +14,13 @@
 
 package com.klinker.android.link_builder;
 
+import android.content.Context;
+import android.content.res.TypedArray;
 import android.graphics.Color;
 import android.os.Handler;
 import android.text.TextPaint;
 import android.text.style.ClickableSpan;
+import android.util.TypedValue;
 import android.view.View;
 
 public class TouchableSpan extends ClickableSpan {
@@ -25,12 +28,33 @@ public class TouchableSpan extends ClickableSpan {
     private final Link link;
     public boolean touched = false;
 
+    private int textColor;
+
     /**
      * Construct new TouchableSpan using the link
      * @param link
      */
-    public TouchableSpan(Link link) {
+    public TouchableSpan(Context context, Link link) {
         this.link = link;
+
+        if (link.getTextColor() == 0) {
+            this.textColor = getDefaultColor(context);
+        } else {
+            this.textColor = link.getTextColor();
+        }
+    }
+
+    /**
+     * Finds the default color for links based on the current theme.
+     * @param context activity
+     * @return color as an integer
+     */
+    private int getDefaultColor(Context context) {
+        TypedArray array = obtainStyledAttrsFromThemeAttr(context, R.attr.linkBuilderStyle, R.styleable.LinkBuilder);
+        int color = array.getColor(R.styleable.LinkBuilder_defaultLinkColor, Link.DEFAULT_COLOR);
+        array.recycle();
+
+        return color;
     }
 
     /**
@@ -86,7 +110,7 @@ public class TouchableSpan extends ClickableSpan {
     }
 
     /**
-     * Draw the links background and set whether or not we want it to be underlined
+     * Draw the links background and set whether or not we want it to be underlined or bold
      * @param ds the link
      */
     @Override
@@ -94,8 +118,11 @@ public class TouchableSpan extends ClickableSpan {
         super.updateDrawState(ds);
 
         ds.setUnderlineText(link.isUnderlined());
-        ds.setColor(link.getTextColor());
-        ds.bgColor = touched ? adjustAlpha(link.getTextColor(), link.getHighlightAlpha()) : Color.TRANSPARENT;
+        ds.setFakeBoldText(link.isBold());
+        ds.setColor(textColor);
+        ds.bgColor = touched ? adjustAlpha(textColor, link.getHighlightAlpha()) : Color.TRANSPARENT;
+        if(link.getTypeface() != null)
+            ds.setTypeface(link.getTypeface());
     }
 
     /**
@@ -104,5 +131,19 @@ public class TouchableSpan extends ClickableSpan {
      */
     public void setTouched(boolean touched) {
         this.touched = touched;
+    }
+
+    protected static TypedArray obtainStyledAttrsFromThemeAttr(Context context, int themeAttr, int[] styleAttrs) {
+        // Need to get resource id of style pointed to from the theme attr
+        TypedValue outValue = new TypedValue();
+        context.getTheme().resolveAttribute(themeAttr, outValue, true);
+        final int styleResId = outValue.resourceId;
+
+        // Now return the values (from styleAttrs) from the style
+        return context.obtainStyledAttributes(styleResId, styleAttrs);
+    }
+
+    public boolean isTouched() {
+        return touched;
     }
 }
