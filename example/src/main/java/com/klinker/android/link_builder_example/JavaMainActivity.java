@@ -1,25 +1,12 @@
-/*
-    Licensed under the Apache License, Version 2.0 (the "License");
-    you may not use this file except in compliance with the License.
-    You may obtain a copy of the License at
-
-       http://www.apache.org/licenses/LICENSE-2.0
-
-    Unless required by applicable law or agreed to in writing, software
-    distributed under the License is distributed on an "AS IS" BASIS,
-    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-    See the License for the specific language governing permissions and
-    limitations under the License.
- */
-
 package com.klinker.android.link_builder_example;
 
-import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -30,7 +17,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
 
-public class MainActivity extends Activity {
+public class JavaMainActivity extends AppCompatActivity {
 
     private static final String GITHUB_LINK = "https://github.com/klinker24";
     private static final String TWITTER_PROFILE = "https://twitter.com/";
@@ -42,6 +29,11 @@ public class MainActivity extends Activity {
 
         // set the content view. Contains a scrollview with a text view inside
         setContentView(R.layout.activity_main);
+
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+
+        toolbar.setTitle(R.string.app_name);
 
         // find the text view. Used to create the link builder
         TextView demoText = (TextView) findViewById(R.id.test_text);
@@ -58,12 +50,12 @@ public class MainActivity extends Activity {
         // create a single click link to the github page
         Link github = new Link("TextView-LinkBuilder");
         github.setTypeface(Typeface.DEFAULT_BOLD)
-        .setOnClickListener(new Link.OnClickListener() {
-            @Override
-            public void onClick(String clickedText) {
-                openLink(GITHUB_LINK);
-            }
-        });
+                .setOnClickListener(new Link.OnClickListener() {
+                    @Override
+                    public void onClick(String clickedText) {
+                        openLink(GITHUB_LINK);
+                    }
+                });
 
         // create a single click link to the matched twitter profiles
         Link mentions = new Link(Pattern.compile("@\\w{1,15}"));
@@ -121,13 +113,14 @@ public class MainActivity extends Activity {
         // link to our play store page
         Link playStore = new Link("Play Store");
         playStore.setTextColor(Color.parseColor("#FF9800"));
+        playStore.setTextColorOfHighlightedLink(Color.parseColor("#FF6600"));
+        playStore.setHighlightAlpha(0f);
         playStore.setOnClickListener(new Link.OnClickListener() {
             @Override
             public void onClick(String clickedText) {
                 openLink(PLAY_STORE);
             }
         });
-
 
         // add the links to the list
         links.add(github);
@@ -150,6 +143,6 @@ public class MainActivity extends Activity {
     }
 
     private void showToast(String text) {
-        Toast.makeText(MainActivity.this, text, Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, text, Toast.LENGTH_SHORT).show();
     }
 }
